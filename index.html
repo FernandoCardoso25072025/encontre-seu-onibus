@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encontre seu Ônibus</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoXmZTKm/PUKsybetxSL6NVEfFVWGKj1W3jvJ7Q=" crossorigin=""/>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚌 Encontre seu Ônibus</h1>
+            <p>Digite seu endereço e descubra qual linha te leva ao destino</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="search-section">
+                <h2 class="section-title">
+                    <span class="icon"></span>
+                    Buscar Rota
+                </h2>
+                
+                <div class="form-group">
+                    <label for="userAddress">Seu endereço atual:</label>
+                    <input type="text" id="userAddress" placeholder="Ex: Rua das Flores, 123" aria-label="Digite seu endereço atual">
+                </div>
+                
+                <div class="form-group">
+                    <label for="destination">Destino (opcional):</label>
+                    <input type="text" id="destination" placeholder="Ex: Centro da cidade" aria-label="Digite seu destino (opcional)">
+                </div>
+                
+                <button id="searchButton" aria-label="Encontrar ônibus">🔍 Encontrar Ônibus</button>
+                
+                <div id="searchResult" class="result">
+                    <h3>Ônibus Recomendados:</h3>
+                    <div id="busResults"></div>
+                    <div id="mapContainer" style="height: 400px; margin-top: 20px; border-radius: 10px; display: none;"></div>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h2 class="section-title">
+                    <span class="icon"></span>
+                    Gerenciar Rotas
+                </h2>
+                
+                <div class="form-group">
+                    <label for="busNumber">Número do Ônibus:</label>
+                    <input type="text" id="busNumber" placeholder="Ex: 101" aria-label="Número da linha de ônibus">
+                </div>
+                
+                <div class="form-group">
+                    <label for="busRoute">Nome da Rota:</label>
+                    <input type="text" id="busRoute" placeholder="Ex: Centro - Terminal" aria-label="Nome da rota do ônibus">
+                </div>
+                
+                <div class="form-group">
+                    <label for="busStops">Endereços da Rota (um por linha):</label>
+                    <textarea id="busStops" rows="5" placeholder="Rua A, 100
+Avenida B, 200
+Praça C, s/n" aria-label="Lista de endereços da rota, um por linha"></textarea>
+                </div>
+                
+                <button id="addRouteButton" aria-label="Adicionar nova rota">➕ Adicionar Rota</button>
+                
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()" role="button" aria-label="Clique para importar arquivo CSV de rotas">
+                    <p>📁 Clique para importar arquivo CSV</p>
+                    <small>Formato: Número,Rota,Endereços</small>
+                    <input type="file" id="fileInput" accept=".csv" style="display: none;" aria-hidden="true">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button id="exportButton" style="background: linear-gradient(45deg, #FF9800, #FFB74D); font-size: 14px; padding: 8px 15px;" aria-label="Exportar backup de rotas">
+                        📤 Exportar
+                    </button>
+                    <button id="clearButton" style="background: linear-gradient(45deg, #f44336, #e57373); font-size: 14px; padding: 8px 15px;" aria-label="Limpar todas as rotas">
+                        🗑️ Limpar
+                    </button>
+                </div>
+                
+                <div id="successMessage" class="success-message" role="alert" aria-live="polite">
+                    Operação realizada com sucesso!
+                </div>
+                
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; border-left: 4px solid #2196F3;">
+                    <h4 style="margin: 0 0 10px 0; color: #1976D2;">💾 Armazenamento Local</h4>
+                    <p style="margin: 0; font-size: 0.9em; color: #555;">
+                        ✅ Dados salvos automaticamente<br>
+                        ✅ Funciona offline<br>
+                        ✅ Backup recomendado
+                    </p>
+                </div>
+                
+                <div class="routes-list">
+                    <h4>Rotas Cadastradas:</h4>
+                    <div id="routesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nEFhC66OsaH7rOq9XlqHuyt0/x2B6V7s6vj0yUqj0=" crossorigin=""></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
