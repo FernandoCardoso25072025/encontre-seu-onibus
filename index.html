@@ -2,106 +2,1070 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encontre seu Ônibus</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoXmZTKm/PUKsybetxSL6NVEfFVWGKj1W3jvJ7Q=" crossorigin=""/>
+    <title>Consulta Completa - Linhas Volvo (39 Rotas)</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #busca { 
+            padding: 12px; 
+            width: 100%; 
+            margin-bottom: 20px; 
+            border: 2px solid #0066cc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #0066cc; color: white; position: sticky; top: 0; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f1f1f1; }
+        .destaque { background-color: #fffacd !important; }
+        #contador { 
+            color: #666; 
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚌 Encontre seu Ônibus</h1>
-            <p>Digite seu endereço e descubra qual linha te leva ao destino</p>
-        </div>
-        
-        <div class="main-content">
-            <div class="search-section">
-                <h2 class="section-title">
-                    <span class="icon"></span>
-                    Buscar Rota
-                </h2>
-                
-                <div class="form-group">
-                    <label for="userAddress">Seu endereço atual:</label>
-                    <input type="text" id="userAddress" placeholder="Ex: Rua das Flores, 123" aria-label="Digite seu endereço atual">
-                </div>
-                
-                <div class="form-group">
-                    <label for="destination">Destino (opcional):</label>
-                    <input type="text" id="destination" placeholder="Ex: Centro da cidade" aria-label="Digite seu destino (opcional)">
-                </div>
-                
-                <button id="searchButton" aria-label="Encontrar ônibus">🔍 Encontrar Ônibus</button>
-                
-                <div id="searchResult" class="result">
-                    <h3>Ônibus Recomendados:</h3>
-                    <div id="busResults"></div>
-                    <div id="mapContainer" style="height: 400px; margin-top: 20px; border-radius: 10px; display: none;"></div>
-                </div>
-            </div>
-            
-            <div class="admin-section">
-                <h2 class="section-title">
-                    <span class="icon"></span>
-                    Gerenciar Rotas
-                </h2>
-                
-                <div class="form-group">
-                    <label for="busNumber">Número do Ônibus:</label>
-                    <input type="text" id="busNumber" placeholder="Ex: 101" aria-label="Número da linha de ônibus">
-                </div>
-                
-                <div class="form-group">
-                    <label for="busRoute">Nome da Rota:</label>
-                    <input type="text" id="busRoute" placeholder="Ex: Centro - Terminal" aria-label="Nome da rota do ônibus">
-                </div>
-                
-                <div class="form-group">
-                    <label for="busStops">Endereços da Rota (um por linha):</label>
-                    <textarea id="busStops" rows="5" placeholder="Rua A, 100
-Avenida B, 200
-Praça C, s/n" aria-label="Lista de endereços da rota, um por linha"></textarea>
-                </div>
-                
-                <button id="addRouteButton" aria-label="Adicionar nova rota">➕ Adicionar Rota</button>
-                
-                <div class="upload-area" onclick="document.getElementById('fileInput').click()" role="button" aria-label="Clique para importar arquivo CSV de rotas">
-                    <p>📁 Clique para importar arquivo CSV</p>
-                    <small>Formato: Número,Rota,Endereços</small>
-                    <input type="file" id="fileInput" accept=".csv" style="display: none;" aria-hidden="true">
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button id="exportButton" style="background: linear-gradient(45deg, #FF9800, #FFB74D); font-size: 14px; padding: 8px 15px;" aria-label="Exportar backup de rotas">
-                        📤 Exportar
-                    </button>
-                    <button id="clearButton" style="background: linear-gradient(45deg, #f44336, #e57373); font-size: 14px; padding: 8px 15px;" aria-label="Limpar todas as rotas">
-                        🗑️ Limpar
-                    </button>
-                </div>
-                
-                <div id="successMessage" class="success-message" role="alert" aria-live="polite">
-                    Operação realizada com sucesso!
-                </div>
-                
-                <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; border-left: 4px solid #2196F3;">
-                    <h4 style="margin: 0 0 10px 0; color: #1976D2;">💾 Armazenamento Local</h4>
-                    <p style="margin: 0; font-size: 0.9em; color: #555;">
-                        ✅ Dados salvos automaticamente<br>
-                        ✅ Funciona offline<br>
-                        ✅ Backup recomendado
-                    </p>
-                </div>
-                
-                <div class="routes-list">
-                    <h4>Rotas Cadastradas:</h4>
-                    <div id="routesList"></div>
-                </div>
-            </div>
-        </div>
+    <h1 style="color: #0066cc;">Linhas Volvo - Todas as 39 Rotas</h1>
+    <input type="text" id="busca" placeholder="Digite bairro, cidade, linha ou endereço...">
+    <p id="contador">Carregando todas as paradas...</p>
+    <div style="overflow-x: auto;">
+        <table id="tabela">
+            <thead>
+                <tr>
+                    <th>Linha</th>
+                    <th>Rota</th>
+                    <th>Endereço</th>
+                    <th>Bairro</th>
+                    <th>Cidade</th>
+                </tr>
+            </thead>
+            <tbody id="corpo-tabela">
+                <!-- Dados serão inseridos aqui pelo JavaScript -->
+            </tbody>
+        </table>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nEFhC66OsaH7rOq9XlqHuyt0/x2B6V7s6vj0yUqj0=" crossorigin=""></script>
-    <script type="module" src="js/main.js"></script>
+    <script>
+        // Dados COMPLETOS das 39 linhas (exemplo com 3 linhas - adicione o restante seguindo o padrão)
+        const dados = [
+            {
+        numero: "247",
+        rota: "VOLVO FÁBRICA - ÁGUAS CLARAS",
+        paradas: [
+            "Rua Ipê 217 Jardim Guarany Campo Largo",
+            "Rua Agostinho Razera 65 Vila Elizabeth Campo Largo",
+            "Rua Vinte e Um de Abril 122 Jardim Alvorada Campo Largo",
+            "Rua José Robacker 250 Vila Otto Campo Largo",
+            "Rua Carmen Miranda 1013 Vila Otto Campo Largo",
+            "Rua Vergílio Casagrandi 715 Vila Elizabeth Campo Largo",
+            "Rua Faustino Rivabem 26 Vila Bancaria Campo Largo",
+            "Rua Joanim Stroparo 500 Vila Bancaria Campo Largo",
+            "Rua Jovelino Apolinário 114 Centro Campo Largo",
+            "Estrada Colônia Cristina 222 Popular Nova Campo Largo",
+            "Avenida Cristina 389 Popular Nova Campo Largo",
+            "Rua José Gavlak 310 Joaquim C Ferreira Campo Largo",
+            "Rua José Gavlak 152 Conjunto Habitacional Joaquim Celestino Ferreira Campo Largo",
+            "Rua José Gavlak 22 Conjunto Habitacional Joaquim Celestino Ferreira Campo Largo",
+            "Rua Amarilio Lavali 1 Jardim Floresta Campo Largo",
+            "Rua Amarilio Lavali 640 Jardim Floresta Campo Largo",
+            "Rua Paulo Bianco 1253 Jardim Floresta Campo Largo",
+            "Rua Paulo Bianco 901 Jardim das Palmas Campo Largo",
+            "Rua Gilberto Age 88 Vila Bancaria Campo Largo",
+            "Rua Sete de Setembro 1875 Centro Campo Largo",
+            "Rua Euclides de Andrade 204 Loteamento Santa Rita Campo Largo",
+            "Rua José Torres 1045 Jardim São Vicente Campo Largo",
+            "Rua Gumercindo Santana 116 Loteamento Vila Verde Campo Largo",
+            "Rua José de Paiva Vidal 2156 Vila Santa Terezinha Campo Largo",
+            "Rua Alcebíades Afonso Guimarães 5267 Jardim São Vicente Campo Largo",
+            "Rua Casemiro de Abreu 246 São Marcos Campo Largo",
+            "Rua Erci de Queirós 140 Conjunto Águas Claras Campo Largo",
+            "Avenida Dirço Ribas 4234 Jardim Esmeralda Campo Largo"
+        ]
+    },
+    {
+        numero: "246",
+        rota: "VOLVO FÁBRICA - ESTADOS",
+        paradas: [
+            "Rua Santo Antero 204 Santa Terezinha Fazenda Rio Grande",
+            "Rua São Joaquim 361 Santa Terezinha Fazenda Rio Grande",
+            "Rua Santa Helena 04 Santa Terezinha Fazenda Rio Grande",
+            "Rua Rio Piquiri 486 Iguaçu Fazenda Rio Grande",
+            "Rua Santo Agostinho 321 Santa Terezinha Fazenda Rio Grande",
+            "Rua São João 1059 Santa Terezinha Fazenda Rio Grande",
+            "Rua São João 1013 Santa Terezinha Fazenda Rio Grande",
+            "Rua São Bartolomeu 44 Santa Terezinha Fazenda Rio Grande",
+            "Rua Nossa Senhora do Carmo 1574 Santa Terezinha Fazenda Rio Grande",
+            "Rua Nossa Senhora das Graças 1120 Santa Terezinha Fazenda Rio Grande",
+            "Rua Jaguariaiva 345 Estados Fazenda Rio Grande",
+            "Travessa Palotina 549 Estados Fazenda Rio Grande",
+            "Rua Matinhos nº 1374 Estados Fazenda Rio Grande",
+            "Travessa Londrina 137 Fazenda Rio Grande",
+            "Rua Rio Grande do Sul 125 Estados Fazenda Rio Grande",
+            "Rua Paraíba 222 Estados Fazenda Rio Grande",
+            "Rua Boa Vista 198 SANTA MARIA Fazenda Rio Grande"
+        ]
+    },
+    {
+        numero: "244",
+        rota: "VOLVO FÁBRICA - VENEZA",
+        paradas: [
+            "Rua Vinheiro 361 Eucaliptos Fazenda Rio Grande",
+            "Avenida Angelim 55 Eucaliptos Fazenda Rio Grande",
+            "Avenida Araucárias 878 Eucaliptos Fazenda Rio Grande",
+            "Rua Sucupira 2 Eucaliptos Fazenda Rio Grande",
+            "Avenida Venezuela 355 Eucaliptos Fazenda Rio Grande",
+            "Avenida Venezuela 472 Nações Fazenda Rio Grande",
+            "Avenida Venezuela 741 Eucaliptos Fazenda Rio Grande",
+            "Rua Uruguai 392 Nações Fazenda Rio Grande",
+            "Rua Chile 108 Nações Fazenda Rio Grande",
+            "Rua Argentina 349 Nações Fazenda Rio Grande",
+            "Avenida Estados Unidos 239 Nações Fazenda Rio Grande",
+            "Travessa Israel 183 Nações Fazenda Rio Grande",
+            "Avenida Áustria 995 Nações Fazenda Rio Grande",
+            "Avenida Áustria 995 Nações Fazenda Rio Grande",
+            "Avenida Polônia 402 Nações Fazenda Rio Grande",
+            "Avenida Islândia 491 Nações Fazenda Rio Grande",
+            "Rua Madagascar 494 Nações Fazenda Rio Grande",
+            "Rua Sérvia 800 Nações Fazenda Rio Grande",
+            "Rua Sérvia 800 Nações Fazenda Rio Grande",
+            "Rua Sérvia 800 Nações Fazenda Rio Grande",
+            "Travessa Pardais 53 Gralha Azul Fazenda Rio Grande",
+            "Avenida Perdizes 534 Gralha Azul Fazenda Rio Grande"
+        ]
+    },
+    {
+        numero: "242",
+        rota: "VOLVO FÁBRICA - JD ACACIAS",
+        paradas: [
+            "Rua José Arnaldo Cosmo 2174 Salgadinho Campo Largo",
+            "Rua Luis Rivabem 1550 Vila Rivabem Campo Largo",
+            "Rua Luis Rivabem 1405 Vila Rivabem Campo Largo",
+            "Rua Siqueira Campos 903 Vila Rivabem Campo Largo",
+            "Rua Estanislau Kellner 27 Loteamento São Gerônimo Campo Largo",
+            "Rua Estanislau Kellner 197 Jardim Social Campo Largo",
+            "Rua Estanislau Kellner 197 Jardim Social Campo Largo",
+            "Rua Niterói 580 Jardim Rivabem Campo Largo",
+            "Rua das Bandeiras 13 Jardim Rivabem Campo Largo",
+            "Rua Piauí 172 Vila Itaqui Campo Largo",
+            "Rua Sergipe 114 Jardim Itaqui Campo Largo",
+            "Rodovia Dos Expedicionários 5481 Vila Kuster Campo Largo",
+            "Avenida dos Expedicionários 5520 Bonn Jesus Campo Largo",
+            "Rua Reginaldo Antônio Rosa 700 Vila Campos Campo Largo",
+            "Avenida dos Expedicionários 530 Vila Gloria Campo Largo",
+            "Rua Cinco 172 Jardim Lorenzete Campo Largo",
+            "Rua Cinco 172 Jardim Lorenzete Campo Largo",
+            "Rua Cinco 172 Jardim Lorenzete Campo Largo",
+            "Rua Issacar 203 Jardim Cristo Rei Campo Largo",
+            "Rua Uruguai 44 Conjunto Águas Claras Campo Largo",
+            "Rua Das Begônias 32 Jardim das Acácias Campo Largo",
+            "Rua Pedro Seguro 85 Boituava Campo Largo"
+        ]
+    },
+    {
+        numero: "241",
+        rota: "VOLVO FÁBRICA - CAIUÁ",
+        paradas: [
+            "Rua Lodovico Kaminski 1414 Cidade Industrial de Curitiba Curitiba",
+            "Rua Synval Stockero 75 Augusta Curitiba",
+            "Rua Synval Stockero 75 Augusta Curitiba",
+            "Rua Alvares de Azevedo 761 Cidade Industrial de Curitiba Curitiba",
+            "Rua Raul Pompéia Rio 519 520 2453 Cidade Industrial de Curitiba Curitiba",
+            "Rua Francisco De Caragnoli Junior 478 Cidade Industrial de Curitiba Curitiba",
+            "Avenida Juscelino Kubitschek De Oliveira Ld 6526 Cidade Industrial de Curitiba Curitiba",
+            "Rua Deputado Cunha Bueno 332 Cidade Industrial de Curitiba Curitiba",
+            "Rua dos Expedicionários 77 Cidade Industrial de Curitiba Curitiba",
+            "Estrada Velha do Barigui 2285 Cidade Industrial de Curitiba Curitiba",
+            "Rua L 48 Cidade Industrial de Curitiba Curitiba",
+            "Rua Lauro Schereibe 861 Cidade Industrial de Curitiba Curitiba"
+        ]
+    },
+    {
+        numero: "239",
+        rota: "VOLVO FÁBRICA - BETONEX",
+        paradas: [
+            "Rua Eduardo Ravaglio 210 Jurema São José dos Pinhais",
+            "Rua Engenheiro Djalma Maciel 440 Jardim Santa Mônica Piraquara",
+            "Rua Duarte da Costa 881 Jardim Bela Vista Piraquara",
+            "Rua Cedro 173 Vila Santa Maria Piraquara",
+            "Rua Olavio de Sousa 207 Vila Santa Maria Piraquara",
+            "Rua Carlito Gomes 106 Vila Fuchs Piraquara",
+            "Rua Papa Paulo VI 151 Vila Juliana Piraquara",
+            "Rua João Meireles 356 Vila Rosa Piraquara",
+            "Avenida Lírio Jacomel 521 Planta Deodoro Piraquara"
+        ]
+    },
+    {
+        numero: "238",
+        rota: "VOLVO FÁBRICA - BORDA DO CAMPO",
+        paradas: [
+            "Rua Telêmaco Augusto Enéas Morocines Borba 289 Roseira de São Sebastião São José dos Pinhais",
+            "Rua Santa Efigênia 196 Roseira de São Sebastião São José dos Pinhais",
+            "Rua Alcidio Zaniolo 485 Roseira de São Sebastião São José dos Pinhais",
+            "Rua Valdir Bertoti 18c Borda do Campo São José dos Pinhais",
+            "Rua Videira 575 Borda do Campo São José dos Pinhais",
+            "Rua Videira 575 Borda do Campo São José dos Pinhais",
+            "Rua Sebastiana Santana Fraga 187 Guatupê São José dos Pinhais",
+            "Rua Aristides Ramos de Abreu 75 Guatupê São José dos Pinhais",
+            "Rua Felinto Alcides Camargo 376 Ipê São José dos Pinhais",
+            "Rua José Preto 295 Ipê São José dos Pinhais",
+            "Rua Laérte Fenelon 716 Ipê São José dos Pinhais",
+            "Rua Daniel Precoma 457 Ipê São José dos Pinhais",
+            "Rua Salomão Miguel Nasser 1055 Guatupê São José dos Pinhais",
+            "Rua Eurides de Souza 573 Parque da Fonte São José dos Pinhais"
+        ]
+    },
+    {
+        numero: "237",
+        rota: "VOLVO FÁBRICA - MIRINGUAVA",
+        paradas: [
+            "Rua Adauto Marineski 184 Miringuava São José dos Pinhais",
+            "Rua Marlene Veiga da Rosa 723 Miringuava São José dos Pinhais",
+            "Rua Santos Dumont 489 Miringuava São José dos Pinhais",
+            "Rua Rosario Garcia 447 Campo Largo da Roseira São José dos Pinhais",
+            "Rua Martins Follador 321 Campo Largo da Roseira São José dos Pinhais",
+            "Rua Francisco Pereira da Cruz 377 Campo Largo da Roseira São José dos Pinhais",
+            "Rua Pedro Scherer 665 São Marcos São José dos Pinhais",
+            "Rua Amilton Luís Ubá 283 São Marcos São José dos Pinhais"
+        ]
+    },
+    {
+        numero: "234",
+        rota: "VOLVO FÁBRICA - NSA SRA DA LUZ",
+        paradas: [
+            "Rua Frei Eurico de Mello 126 Cidade Industrial de Curitiba Curitiba",
+            "Rua Osni Antunes de Sá 61 Cidade Industrial de Curitiba Curitiba",
+            "Rua José Aniceto 80 Cidade Industrial de Curitiba Curitiba",
+            "Rua Florentim Ançã 59 Cidade Industrial de Curitiba Curitiba",
+            "Rua Senador Accioly Filho 1455 Cidade Industrial de Curitiba Curitiba",
+            "Rua Senador Accioly Filho 1350 Cidade Industrial de Curitiba Curitiba",
+            "Rua Senador Accioly Filho 585 Novo Mundo Curitiba",
+            "Rua Osmar Rosa 256 Cidade Industrial de Curitiba Curitiba",
+            "Rua Aroldo Coturel 45 Cidade Industrial de Curitiba Curitiba",
+            "Rua Heitor José Ferreira 54 Cidade Industrial de Curitiba Curitiba",
+            "Rua Ivo Odia 134 Cidade Industrial de Curitiba Curitiba",
+            "Rua Schirlei Solange Mantovani 651 Cidade Industrial de Curitiba Curitiba",
+            "Rua Florzea Mouro Peixoto 65 Cidade Industrial de Curitiba Curitiba",
+            "Rua Pastor Luiz Antônio Alvear Lagos 276 Cidade Industrial de Curitiba Curitiba"
+        ]
+    },
+    {
+        numero: "233",
+        rota: "VOLVO FÁBRICA - CALIFÓRNIA",
+        paradas: [
+            "Rua Tesoureiro 2552 Capela Velha Araucária",
+            "Rua Bela Flor 1294 Capela Velha Araucária",
+            "Rua Tucano 1456 Capela Velha Araucária",
+            "Rua Uirapuru 886 Capela Velha Araucária",
+            "Rua Rouxinol 512 Capela Velha Araucária",
+            "Rua Avestruz 97 Capela Velha Araucária",
+            "Rua Cardeal 260 Capela Velha Araucária",
+            "Rua Yoshiaki Nagano 510 Capela Velha Araucária",
+            "Rua Audáo 169 Capela Velha Araucária",
+            "Rua Roberto Rontal 256 Capela Velha Araucária",
+            "Rua Nilo Cardoso Bacelar 82 Capela Velha Araucária",
+            "Rua Taturana 226 Capela Velha Araucária",
+            "Rua João Assef 593 Estação Araucária",
+            "Rua Doutor Vital Brasil 316 Estação Araucária",
+            "Rua Doutor Vital Brasil 316 Estação Araucária",
+            "Rua Olga Centafor Incott 390 Fazenda Velha Araucária",
+            "Rua Helena Piekarski Pinto 210 Fazenda Velha Araucária",
+            "Rua Pedro Gawlak 872 Fazenda Velha Araucária",
+            "Rua Pedro de Alcântara Meira 565 Fazenda Velha Araucária",
+            "Rua Antônio Cândido Nascimento 489 Fazenda Velha Araucária",
+            "Rua Alberto Karas 1773 Fazenda Velha Araucária",
+            "Avenida Independência 1499 Porto das Laranjeiras Araucária",
+            "Rua Capitão Leonardo Graziano 580 Porto das Laranjeiras Araucária"
+        ]
+    },
+    {
+        numero: "231",
+        rota: "VOLVO FÁBRICA - RIO NEGRO",
+        paradas: [
+            "Rua Dr Plinio G Marques 241 Pinheirinho Curitiba",
+            "Rua Carlópolis 515 Pinheirinho Curitiba",
+            "Rua Inajá 255 Pinheirinho Curitiba",
+            "Rua Açucará 448 Pinheirinho Curitiba",
+            "Rua Andorinhas 276 Pinheirinho Curitiba",
+            "Rua Inajá 551 Pinheirinho Curitiba",
+            "Rua Juvenal de Sá 23 Sítio Cercado Curitiba",
+            "Rua Ibiati 850 Sítio Cercado Curitiba",
+            "Rua Sabiá Lima 23 Sítio Cercado Curitiba",
+            "Rua Luiza Torrão 86 Sítio Cercado Curitiba",
+            "Rua Nova Esperança 527 Sítio Cercado Curitiba",
+            "Rua César Vicente Vey 366 Sítio Cercado Curitiba",
+            "Rua Nova Antonina 571 Sítio Cercado Curitiba",
+            "Rua Anhaguera 150 Sítio Cercado Curitiba",
+            "Rua Tijucas do Sul 1660 Sítio Cercado Curitiba",
+            "Rua Tijucas do Sul 1518 Sítio Cercado Curitiba",
+            "Rua Tijucas do Sul 1518 Sítio Cercado Curitiba",
+            "Rua Nova Andirá 1214 Sítio Cercado Curitiba",
+            "Rua Sabia 456 Sítio Cercado Curitiba",
+            "Rua Nova Esperança 2150 Sítio Cercado Curitiba",
+            "Rua Cristina Vicente Silva 366 Sítio Cercado Curitiba",
+            "Rua César Constante Schiavon 522 Sítio Cercado Curitiba",
+            "Rua Coronário Marocos Schiavon 388 Sítio Cercado Curitiba",
+            "Rua Teresa Ferlanda Nichelle 218 Sítio Cercado Curitiba",
+            "Rua Paulo Roberto de Macedo 551 Sítio Cercado Curitiba",
+            "Rua Carícies Munhoz Sobrinho 1213 Sítio Cercado Curitiba",
+            "Rua Major Gilibert Babiroto Gláxi 44 Sítio Cercado Curitiba",
+            "Rua Therezinha Schumacker França 3305 Sítio Cercado Curitiba",
+            "Rua Vicente Dionizio 21 Sítio Cercado Curitiba",
+            "Rua José Santos Pena 20 Sítio Cercado Curitiba",
+            "Rua Everly Techilinha Pipica Luques 256 Sítio Cercado Curitiba",
+            "Rua Francisco Supimino 329 Andrade 177 Sítio Cercado Curitiba",
+            "Rua Povl Town 3530 Sítio Cercado Curitiba",
+            "Rua Constatin Francueszo 204 Sítio Cercado Curitiba"
+        ]
+    },
+    {
+        numero: "230",
+        rota: "VOLVO FÁBRICA - SOLITUDE",
+        paradas: [
+            "Rua Coronel Antônio Ricardo dos Santos 1207 Hauer Curitiba",
+            "Rua Coronel Antônio Ricardo dos Santos 1373 Hauer Curitiba",
+            "Rua Jean Baptista Debret 2 Guabirotuba Curitiba",
+            "Rua Tenente-Coronel João Antônio Ramalho 145 Jardim das Américas Curitiba",
+            "Rua Flávio Mariano Ribas 318 Uberaba Curitiba",
+            "Rua Antônio Brandalize 123 Uberaba Curitiba",
+            "Rua Padre Júlio Saavedra 870 Uberaba Curitiba",
+            "Avenida Senador Salgado Filho 4136 Uberaba Curitiba",
+            "Rua Rodolfo Bernardelli 219 Uberaba Curitiba",
+            "Rua Antônio Andriguetto 297 Uberaba Curitiba",
+            "Rua Canal Belém - Marginal Leste 9412 Guabirotuba Curitiba",
+            "Rua Desembargador Antonio de Paula 367 Boqueirão Curitiba",
+            "Rua Tenente Coronel Benjamin Batista 353 Uberaba Curitiba",
+            "Rua Luiza Gasola Santi 12 Uberaba Curitiba",
+            "Rua Julieta Abrão Sado 68 Uberaba Curitiba",
+            "Rua Antônio Luiz Maganhoto 305 Uberaba Curitiba",
+            "Rua Antônio Emilio Cumin 215 Uberaba Curitiba",
+            "Rua Capitão Leônidas Marques 1145 Uberaba Curitiba"
+        ]
+    },
+    {
+        numero: "229",
+        rota: "VOLVO FÁBRICA - LINDÓIA",
+        paradas: [
+            "Rua Rezara Simão 600 Santa Quiteria Curitiba",
+            "Rua Itacolomi 971 Portão Curitiba",
+            "Rua Doutor José Palú 468 Novo Mundo Curitiba",
+            "Rua Maranhão 2103 Água Verde Curitiba",
+            "Rua Capitão João Zaleski 1556 Lindóia Curitiba",
+            "Rua Oscar Wilde 740 Lindóia Curitiba",
+            "Rua Professor Antônio Martins Franco 253 Novo Mundo Curitiba",
+            "Rua Padre Manuel da Nóbrega 1081 Fanny Curitiba",
+            "Avenida da República 5755 Guaíra Curitiba",
+            "Avenida da República 5755 Guaíra Curitiba",
+            "Rua Lamenha Lins 3471 Centro Curitiba",
+            "Rua 24 de Maio 2408 Rebouças Curitiba"
+        ]
+    },
+    {
+        numero: "228",
+        rota: "VOLVO FÁBRICA - GANCHINHO",
+        paradas: [
+            "Rua Bórtolo Pelanda 1700 Umbará Curitiba",
+            "Rua Bórtolo Pelanda 1700 Umbará Curitiba",
+            "Rua Maria Eudóxia Cortiano 201 Tatuquara Curitiba",
+            "Rua Maria Eudoxia Cortiano 201 Tatuquara Curitiba",
+            "Rua Faustino Raimundo Pellanda 12 Tatuquara Curitiba",
+            "Rua Maria Balaban 904 Umbará Curitiba",
+            "Rua Francisco Becker 399 Umbará Curitiba",
+            "Rua Professor Czeslaw Marian Bie Zanko 152 Umbará Curitiba",
+            "Rua Professor Valdomiro Zortea 200 Umbará Curitiba",
+            "Rua Engenheiro Alvaro Baptista 23 Umbará Curitiba",
+            "Rua Juvenal Negrello 771 Umbará Curitiba",
+            "Rua Ilha Hulá Maria Negrello 384 Umbará Curitiba",
+            "Rua Bórtolo Pelanda 7 Umbará Curitiba",
+            "Rua Humberto Negrello 50 Umbará Curitiba",
+            "Rua Antônio Nichele 191 Umbará Curitiba",
+            "Rua Aloyso Ignácio Werlang 391 Ganchinho Curitiba",
+            "Rua Alexandro Glenski 1027 Ganchinho Curitiba",
+            "Rua Luiz de Paz José da Rocha 189 Ganchinho Curitiba",
+            "Rua Antônio José Bonato 2019 Ganchinho Curitiba",
+            "Rua Maria Clara de Jesus 126 Ganchinho",
+            "Rua Eduardo Pinto da Rocha 514 Sítio Cercado Curitiba",
+            "Estrada do Ganchinho 3910 Ganchinho Curitiba",
+            "Estrada Da Balsa 5210 Zacarias São José dos Pinhais"
+        ]
+    },
+    {
+        numero: "227",
+        rota: "VOLVO FÁBRICA - UBERABA",
+        paradas: [
+            "Rua Professor Algacyr Munhoz Mader 2135 Cidade Industrial de Curitiba Curitiba",
+            "Rua Professor Algacyr Munhoz Mader 1925 Cidade Industrial de Curitiba Curitiba",
+            "Rua Professor Algacyr Munhoz Mader 1925 Cidade Industrial de Curitiba Curitiba",
+            "Rua Dalila Rolim Vargas 787 Novo Mundo Curitiba",
+            "Rua Agostinho Bruscanello 730 Cidade Industrial de Curitiba Curitiba",
+            "Rua José Zaleski 1240 Capão Raso Curitiba",
+            "Rua Odair Pazello 242 Capão Raso Curitiba",
+            "Rua Marschal Otávio Saldanha Mazza 911 Capão Raso Curitiba",
+            "Rua Atílio Brunetti 1343 Capão Raso Curitiba",
+            "Rua José Pereira de Araujo 530 Capão Raso Curitiba",
+            "Rua José Pereira de Araujo 281 Capão Raso Curitiba",
+            "Rua José Pereira de Araujo 176 Capão Raso Curitiba",
+            "Rua Lothário Boutin 374 Pinheirinho Curitiba",
+            "BR-116 18000 Pinheirinho Curitiba",
+            "Rua Santa Regina 520 Capão Raso Curitiba",
+            "Rua Francisco Raitani 6349 Capão Raso Curitiba",
+            "Rua Francisco Raitani 6349 Capão Raso Curitiba",
+            "Rua Francisco Raitani 6118 Capão Raso Curitiba",
+            "Rua Francisco Raitani 6118 Capão Raso Curitiba",
+            "Rua Deputado Néo Martins 841 Novo Mundo Curitiba",
+            "Rua Evaristo da Veiga 2910 Boqueirão Curitiba",
+            "Rua Cristiano Strobel 139 Xaxim Curitiba",
+            "Rua Oliveira Viana 2469 Hauer Curitiba",
+            "Rua das Carmelitas 1234 Boqueirão Curitiba"
+        ]
+    },
+    {
+        numero: "226",
+        rota: "VOLVO FÁBRICA - GRALHA AZUL",
+        paradas: [
+            "Rua Francisco da Conceição Machado 47 Fazenda Rio Grande",
+            "Rua Lucimir Franco da Rocha 5790 Gralha Azul Fazenda Rio Grande",
+            "Rua Cucos 2352 Gralha Azul Fazenda Rio Grande",
+            "Rua Alcatraz 2038 Gralha Azul Fazenda Rio Grande",
+            "Rua Colibri 1981 Gralha Azul Fazenda Rio Grande",
+            "Rua Alcatraz 1669 Gralha Azul Fazenda Rio Grande",
+            "Rua Alcatraz 1495 Gralha Azul Fazenda Rio Grande",
+            "Rua Francisco da Conceição Machado 1525 Gralha Azul Fazenda Rio Grande",
+            "Rua Francisco da Conceição Machado 1586 Gralha Azul Fazenda Rio Grande",
+            "Rua Macaua 72 Gralha Azul Fazenda Rio Grande",
+            "Rua Guará 554 Gralha Azul Fazenda Rio Grande",
+            "Rua Tangará 1131 Gralha Azul Fazenda Rio Grande",
+            "Avenida Albatroz 366 Gralha Azul Fazenda Rio Grande"
+        ]
+    },
+    {
+        numero: "225",
+        rota: "VOLVO FÁBRICA - ATUBA",
+        paradas: [
+            "Rua Uruguai 243 Bacacheri Curitiba",
+            "Rua Oscar Spena 315 Atuba Curitiba",
+            "Rua Abel Scuissiato 2829 Atuba Colombo",
+            "Rua Abel Scuissiato 2829 Atuba Colombo",
+            "Rua Darwin 714 Atuba Colombo",
+            "Rua Faraday 159 Guarani Colombo",
+            "Rua Libera Gasparin Fiorese 127 Maracanã Colombo",
+            "Rua dos Eucaliptos 550 Guarani Colombo",
+            "Rua Olávio Bilac 847 Maracanã Colombo",
+            "Rua Montemor 104 Santa Terezinha Colombo",
+            "Rua Xambre 114 Paloma Colombo"
+        ]
+    },
+    {
+        numero: "224",
+        rota: "VOLVO FÁBRICA - WEISSÓPOLIS",
+        paradas: [
+            "Rua João Dembinski 1262 Cidade Industrial de Curitiba Curitiba",
+            "Rua Luiz Tramontin 2018 Cidade Industrial de Curitiba Curitiba",
+            "Rua Luiz Tramontin 2018 Cidade Industrial de Curitiba Curitiba",
+            "Rua Luiz Tramontin 2018 Cidade Industrial de Curitiba Curitiba",
+            "Rua Mário Zanlorenzi 1906 Campo Comprido Curitiba",
+            "Rua Maceió 2023 Cajuru Curitiba",
+            "Rua Dante Melara 992 Cajuru Curitiba",
+            "Rua Celzira Ressetti Stofella 23 Cajuru Curitiba",
+            "Rua São João Eudes 21 Cajuru Curitiba",
+            "Avenida Florianópolis 172 Cajuru Curitiba",
+            "Rua Goiânia 1253 Cajuru Curitiba",
+            "Rua Progênito Machuca 62 Cajuru Curitiba",
+            "Rua Paulo de Frontin 811 Cajuru Curitiba",
+            "Rua Catulo da Paixão Cearense 1450 Cajuru Curitiba",
+            "Avenida Florianópolis 11 Cajuru Curitiba",
+            "Rua Santa Lúcia 1192 Cajuru Curitiba",
+            "Rua Santa Lúcia 1831 Cajuru Curitiba",
+            "Rua Rio Ivaí 176 Weissópolis Pinhais",
+            "Rua Rio Tibagi 791 Weissópolis Pinhais",
+            "Rua Rio São Luiz 619 Weissópolis Pinhais",
+            "Rua Graça Aranha 505 Vargem Grande Pinhais",
+            "Rua Rui Barbosa 350 Vargem Grande Pinhais",
+            "Rua Utrecht 22 Guarituba Piraquara",
+            "Avenida Betonex 2346 Planta Santa Lúcia Piraquara",
+            "Rua Jorge Faustino da Silva 12 Jardim dos Eucaliptos Piraquara",
+            "Rua Teresa Liberato Ricardo 10 Planta Vera Cruz Piraquara"
+        ]
+    },
+    {
+        numero: "223",
+        rota: "VOLVO FÁBRICA - SÍTIO CERCADO",
+        paradas: [
+            "Rua Brigadeiro Eduardo Gomes 70 Pinheirinho Curitiba",
+            "Rua Wilson Stadler 209 Pinheirinho Curitiba",
+            "Rua Wilson Stadler 209 Pinheirinho Curitiba",
+            "Rua Cid Marcondes de Albuquerque 1000 Pinheirinho Curitiba",
+            "Rua Cid Marcondes de Albuquerque 1000 Pinheirinho Curitiba",
+            "Rua Leonídio Balaban 7 Pinheirinho Curitiba",
+            "Rua Cid Marcondes de Albuquerque 1180 Pinheirinho Curitiba",
+            "Rua Sebastião Vieira da Rosa 7 Xaxim Curitiba",
+            "Rua Primeiro de Maio 1456 Xaxim Curitiba",
+            "Rua Dois Vizinhos 37 Xaxim Curitiba",
+            "Rua Adib João Saltum 93 Pinheirinho Curitiba",
+            "Rua Engenheiro João Bley Filho 1449 Pinheirinho Curitiba",
+            "Rua João Malta de Albuquerque Maranhão 524 Pinheirinho Curitiba",
+            "Rua Francisco Claudino Ferreira 558 Pinheirinho Curitiba",
+            "Rua Esperança 572 Pinheirinho Curitiba",
+            "Rua Guido Trevisan 152 Pinheirinho Curitiba",
+            "Rua Ilha de Marajó 188 Pinheirinho Curitiba",
+            "Rua Maria da Luz Roguembauer 147 Sítio Cercado Curitiba",
+            "Rua Claudy da Silva Rego 95 Sítio Cercado Curitiba",
+            "Rua Professor Zacarias Líteka 3368 Sítio Cercado Curitiba",
+            "Rua SantAna do Itararé 62 Sítio Cercado Curitiba",
+            "Rua do Sol 17 Sítio Cercado Curitiba",
+            "Rua Leonilda Duarte da Rosa 559 Alto Boqueirão Curitiba",
+            "Travessa Armando Carvalho Chaves 168 Alto Boqueirão Curitiba"
+        ]
+    },
+    {
+        numero: "222",
+        rota: "VOLVO FÁBRICA - ARAUCARIA",
+        paradas: [
+            "Rua Luiz Rodrigues Velho 135 Thomaz Coelho Araucária",
+            "Rua Oneret Zanetti Silva 22 Tindiquera Araucária",
+            "Rua Manoel da Mota Correia 158 Tindiquera Araucária",
+            "Rua Terezinha Olívia Casanova 274 Costeira Araucária",
+            "Rua Minas Gerais 900 Costeira Araucária",
+            "Avenida Archelau de Almeida Torres 2854 Costeira Araucária",
+            "Rua Maringá 679 Iguaçu Araucária",
+            "Rua Paranaguá 133 Iguaçu Araucária",
+            "Rua Itararé 1041 Iguaçu Araucária",
+            "Rua Tocantins 327 Campina da Barra Araucária",
+            "Rua das Amapolas 260 Campina da Barra Araucária",
+            "Rua das Violetas 662 Campina da Barra Araucária",
+            "Rua das Camélias 1435 Campina da Barra Araucária"
+        ]
+    },
+    {
+        numero: "221",
+        rota: "VOLVO FÁBRICA - BATEIAS",
+        paradas: [
+            "Rua Nabor Brito do Prado 396 Vila Torres I Campo Largo",
+            "Rua Virgilio Gomes Cruzara 352 Vila Torres I Campo Largo",
+            "Rua Aguia Branca 10 Vila David Antonio Campo Largo",
+            "Avenida São Pedro 160 Vila David Antonio Campo Largo",
+            "Rua Ernesto Carlos Zoppo 47 Jardim Keli Cristina Campo Largo",
+            "Rua Ernesto Pedro Crozeta 752 Jardim Keli Cristina Campo Largo",
+            "Rua Kelly Cristina 83 Rondinha Campo Largo",
+            "Rua São Cristóvão 800 Rondinha Campo Largo",
+            "Travessa José Bieda 2 Jardim Carmela Campo Largo",
+            "Rua João Miss 850 Campo Largo Campo Largo"
+        ]
+    },
+    {
+        numero: "220",
+        rota: "VOLVO FÁBRICA - ROCIO",
+        paradas: [
+            "Rua Roberto Dobrzanski 378 São José Campo Largo",
+            "Rua Desembargador Clotário Portugal 410 Centro Campo Largo",
+            "Rua José Domingues Pereira 1755 Loteamento São Gerônimo Campo Largo",
+            "Rua José Domingues Pereira 1799 Ouro Verde Campo Largo",
+            "Rua Wadeco Krupa 129 Jardim Busmayer Campo Largo",
+            "Avenida Bom Jesus 3 Bom Jesus Campo Largo",
+            "Rua Bernardo Antônio Guerchewski 255 Vila Santa Terezinha Campo Largo",
+            "Rua José de Paiva Vidal 1232 Vila Santa Terezinha Campo Largo",
+            "Rua José de Paiva Vidal 765 Vila Santa Terezinha Campo Largo",
+            "Rua José de Paiva Vidal 765 Vila Santa Terezinha Campo Largo",
+            "Rua José de Paiva Vidal 1706 Jardim São Vicente Campo Largo",
+            "Rua Dez 308 Jardim Ceu Azul Campo Largo",
+            "Rua Domingos Baptista 143 Ceu Azul Campo Largo",
+            "Rua Américo Zanlorenzi 53 Moradias Bom Jesus Campo Largo"
+        ]
+    },
+    {
+        numero: "219",
+        rota: "VOLVO FÁBRICA - SÃO GABRIEL",
+        paradas: [
+            "Rua Valentín Harkot 397 Campina do Siqueira Curitiba",
+            "Rua Gustão Câmara 559 Bigorrilho Curitiba",
+            "Alameda Doutor Muricy 640 Centro Curitiba",
+            "Rua Lourenço Pinto 2744 Centro Curitiba",
+            "Rua São João 1011 Tingui Curitiba",
+            "Rua Herbert Erico R Kliem 9 Atuba Curitiba",
+            "Avenida Londres 335 Rio Verde Colombo",
+            "Avenida São Gabriel 1950 São Gabriel Colombo",
+            "Travessa Jaci 13 São Gabriel Colombo",
+            "Rua Ângela Secon Corleto 463 São Gabriel Colombo",
+            "Rua Evaldo Lazaroto 14 São Gabriel Colombo"
+        ]
+    },
+    {
+        numero: "218",
+        rota: "VOLVO FÁBRICA - POMPEIA",
+        paradas: [
+            "Rua José Armindo de Paula 309 Cidade Industrial de Curitiba Curitiba",
+            "Rua Emilio Romani 2258 Cidade Industrial de Curitiba Curitiba",
+            "Rua Ali Manfron 77 Cidade Industrial de Curitiba Curitiba",
+            "Rua Anjólio Buzzetti 269 Cidade Industrial de Curitiba Curitiba",
+            "Rua Paul Garfunkel 1354 Cidade Industrial de Curitiba Curitiba",
+            "Rua Almeina Eugênia Ferreira 164 Cidade Industrial de Curitiba Curitiba",
+            "Rua Almerina Eugênia Ferreira 164 Cidade Industrial de Curitiba Curitiba",
+            "Rua Hortêncio Marino dos Santos 27 Cidade Industrial de Curitiba Curitiba",
+            "Rua Ludovina Schuster Rade 237 Cidade Industrial de Curitiba Curitiba",
+            "Rua Elza Fernandes Pataso 232 Cidade Industrial de Curitiba Curitiba",
+            "Rua Julio Xavier Viana 45 Cidade Industrial de Curitiba Curitiba",
+            "Rua Osvaldo Bago 181 Cidade Industrial de Curitiba Curitiba",
+            "Rua Osvaldo Bago 339 Cidade Industrial de Curitiba Curitiba",
+            "Rua Doutor Epaminondas Ribeiro 176 Cidade Industrial de Curitiba Curitiba",
+            "Rua Inácio Wolski 111 Cidade Industrial de Curitiba Curitiba",
+            "Rua Engenheiro Eduardo Alonso Machiny 1144 Cidade Industrial de Curitiba Curitiba",
+            "Rua Major Victor Feijó 585 Cidade Industrial de Curitiba Curitiba",
+            "Rua Ladislau Luka 848 Cidade Industrial de Curitiba Curitiba",
+            "Rua João Lunarelli 2093 Cidade Industrial Curitiba",
+            "Rua Coronel João Rodrigues da Silva Lapa 76 Tatuquara Curitiba",
+            "Rua Joaquim Pinto de Souza 98 Tatuquara Curitiba",
+            "Rua Hermes Faria de Macedo 455 Tatuquara Curitiba",
+            "Travessa Bruno Kotelak 73 Tatuquara Curitiba",
+            "Travessa Leão Trauczynski 302 Tatuquara Curitiba",
+            "Rua Julio Salsamendi 849 Tatuquara Curitiba",
+            "Rua Del Ieda Cristina Ribeiro 444 Tatuquara Curitiba",
+            "Rua Sinfrônio Mesa Neto 412 Tatuquara Curitiba",
+            "Rua Adriana Ceres Zago Bueno 676 Tatuquara Curitiba",
+            "Rua Adriana Ceres Zago Bueno 815 Tatuquara Curitiba"
+        ]
+    },
+    {
+        numero: "217",
+        rota: "VOLVO FÁBRICA - CAMPO DE SANTANA",
+        paradas: [
+            "Rua Moisés Amaro da Luz 114 Tatuquara Curitiba",
+            "Rua Francisco Baron 469 Tatuquara Curitiba",
+            "Rua Francisco Warcheski 571 Tatuquara Curitiba",
+            "Estrada Delegado Bruno de Almeida 1277 Tatuquara Curitiba",
+            "Rua Albor Pimpão de Almeida 609 Tatuquara Curitiba",
+            "Rua João Lessa 294 Tatuquara Curitiba",
+            "Vera Elovila Polzin 275 Tatuquara Curitiba",
+            "Rua Professora Clara Kaehler 310 Tatuquara Curitiba",
+            "Rua Miguel Furmann 1210 Campo de Santana Curitiba",
+            "Rua Miguel Furmann 1210 Campo de Santana Curitiba",
+            "Rua Alida Basseto Bertholdi 322 Campo de Santana Curitiba",
+            "Rua Lydia Girardi Bertholdi 159 Campo de Santana Curitiba",
+            "Rua Augusto Bertoldi 549 Campo de Santana Curitiba",
+            "Rua Emanoel Ernesto Bertoldi 1680 Campo de Santana Curitiba",
+            "Rua Emanoel Ernesto Bertoldi 2330 Campo de Santana Curitiba",
+            "Rua Victória Visinoni Campos 19 Campo de Santana Curitiba",
+            "Rua Osmar Benedito Aleluja 120 Campo de Santana Curitiba",
+            "Rua Antônio Bonésir 331 Campo de Santana Curitiba",
+            "Estrada Delegado Bruno de Almeida 7730 Campo de Santana Curitiba"
+        ]
+    },
+    {
+        numero: "216",
+        rota: "VOLVO FÁBRICA - IGUAÇU",
+        paradas: [
+            "Avenida Paraná 260 Iguaçu Fazenda Rio Grande",
+            "Avenida Paraná 260 Iguaçu Fazenda Rio Grande",
+            "Rua Rio Várzea 697 Iguaçu Fazenda Rio Grande",
+            "Rua Rio Jaú 202 Iguaçu Fazenda Rio Grande",
+            "Rua Rio Jaú 1259 Iguaçu Fazenda Rio Grande",
+            "Rua Rio Jaú 1259 Iguaçu Fazenda Rio Grande",
+            "Rua Santa Ágata 283 Iguaçu Fazenda Rio Grande",
+            "Rua Santa Ágata 283 Iguaçu Fazenda Rio Grande",
+            "Rua Santa Ágata 158 Iguaçu Fazenda Rio Grande",
+            "Rua Santa Ágata 93 Iguaçu Fazenda Rio Grande",
+            "Rua Rio Preto 387 Iguaçu Fazenda Rio Grande",
+            "Rua Abílio Juliano 330 Pioneiros Fazenda Rio Grande"
+        ]
+    },
+    {
+        numero: "215",
+        rota: "VOLVO FÁBRICA - NAÇÕES",
+        paradas: [
+            "Rua Damasceno 76 Eucaliptos Fazenda Rio Grande",
+            "Avenida Brasil 923 Eucaliptos Fazenda Rio Grande",
+            "Travessa Itararé 133 Eucaliptos Fazenda Rio Grande",
+            "Rua Flamboiã 257 Eucaliptos Fazenda Rio Grande",
+            "Rua Chorão 208 Eucaliptos Fazenda Rio Grande",
+            "Rua Fruta do Conde 310 Eucaliptos Fazenda Rio Grande",
+            "Rua Titicí 339 Eucaliptos Fazenda Rio Grande",
+            "Rua Pau Marfim 534 Eucaliptos Fazenda Rio Grande",
+            "Rua Mulungu 97 Eucaliptos Fazenda Rio Grande",
+            "Rua Mulungu 247 Eucaliptos Fazenda Rio Grande",
+            "Avenida Aurora 119 Eucaliptos Fazenda Rio Grande",
+            "Rua Corticeira 689 Eucaliptos Fazenda Rio Grande",
+            "Rua Flamboyant 2955 Eucaliptos Fazenda Rio Grande",
+            "Rua Canela 57 Eucaliptos Fazenda Rio Grande",
+            "Rua Oiti 320 Eucaliptos Fazenda Rio Grande",
+            "Rua Órix 391 Eucaliptos Fazenda Rio Grande",
+            "Rua Peroba 508a Eucaliptos Fazenda Rio Grande",
+            "Avenida Cedro 1474 Eucaliptos Fazenda Rio Grande",
+            "Rua Peroba 729 Eucaliptos Fazenda Rio Grande",
+            "Rua Peroba 729 Eucaliptos Fazenda Rio Grande",
+            "Rua Shipiruína 479 Eucaliptos Fazenda Rio Grande",
+            "Rua Aroeira 414 Eucaliptos Fazenda Rio Grande",
+            "Rua Aroeira 414 Eucaliptos Fazenda Rio Grande",
+            "Avenida Venezuela 1820 Eucaliptos Fazenda Rio Grande",
+            "Avenida Venezuela 1526 Eucaliptos Fazenda Rio Grande",
+            "Travessa Nova Zelândia 372 Nações Fazenda Rio Grande",
+            "Rua Buenos Aires 650 Nações Fazenda Rio Grande",
+            "Rua La Paz 326 Nações Fazenda Rio Grande",
+            "Avenida Paraguai 1517 Nações Fazenda Rio Grande",
+            "Avenida Holanda 246 Nações Fazenda Rio Grande",
+            "Rua Suécia 561 Nações Fazenda Rio Grande",
+            "Rua Suécia 561 Nações Fazenda Rio Grande",
+            "Avenida Polônia 1204 Nações Fazenda Rio Grande"
+        ]
+    },
+    {
+        numero: "214",
+        rota: "VOLVO FÁBRICA - JD PAULISTA",
+        paradas: [
+            "Rua Sebastião Alves Ferreira 1892 Bairro Alto Curitiba",
+            "Rua Sebastião Alves Ferreira 1892 Bairro Alto Curitiba",
+            "Rua Francisco Pompílio de Lima 720 Mauá Colombo",
+            "Rua Marcos Nicolau Strapassoni 260 Jardim Menino Deus Quatro Barras",
+            "Rua Vereador Rosemiro Ferreira dos Santos 128 Jardim Paulista Campina Grande do Sul",
+            "Rua Diamiro Olbinski da Silva 401 Vila São Cosme Campina Grande do Sul",
+            "Rua Ângela de Lara 43 Vila Nossa Senhora de Fátima Quatro Barras"
+        ]
+    },
+    {
+        numero: "213",
+        rota: "VOLVO FÁBRICA - BOA VISTA",
+        paradas: [
+            "Rua Oscar Chanoski 449 Cidade Industrial de Curitiba Curitiba",
+            "Rua Doutor Polan Duszczak 95 Cidade Industrial de Curitiba Curitiba",
+            "Avenida Três Marias 825 São Braz Curitiba",
+            "Rua Magdalena Chagas Lima 189 São Braz Curitiba",
+            "Rua Mario Gomes 110 São Braz Curitiba",
+            "Rua Clara Filla 306 São Braz Curitiba",
+            "Rua São João do Triunfo 930 São Braz Curitiba",
+            "Rua Brasílio Cuman 931 São Braz Curitiba",
+            "Rua Brasílio Cuman 3024 Butiatuvinha Curitiba",
+            "Avenida Vereador Toaldo Túlio 1399 Santa Felicidade Curitiba",
+            "Rua Marcos Mocellin 563 Santa Felicidade Curitiba",
+            "Rua Anna Garcia Da Silva 64 Pilarzinho Curitiba",
+            "Rua Itália Giampoli Amatuzzi 250 Vista Alegre Curitiba",
+            "Avenida dos Canários 108 Loteamento Montparnasse Almirante Tamandaré"
+        ]
+    },
+    {
+        numero: "212",
+        rota: "VOLVO FÁBRICA - MERCURIO",
+        paradas: [
+            "Rua Nicola Pellanda 521 Pinheirinho Curitiba",
+            "Rua Rosa Tortato 21 Pinheirinho Curitiba",
+            "Rua Dilermando Pereira de Almeida 363 Pinheirinho Curitiba",
+            "Rua Dilermando Pereira de Almeida 394 Pinheirinho Curitiba",
+            "Rua Emanuel Voiuz 1201 Pinheirinho Curitiba",
+            "Rua Ricardo Gasparian Machado 1664 Pinheirinho Curitiba",
+            "Rua Isaac Ferreira da Cruz 1685 Pinheirinho Curitiba",
+            "Rua Isaac Ferreira da Cruz 2015 Sítio Cercado Curitiba",
+            "Rua Sertaneja 554 Sítio Cercado Curitiba",
+            "Rua Arapoti 389 Sítio Cercado Curitiba",
+            "Rua Elvira Marquesini Vaz 26 Sítio Cercado Curitiba",
+            "Rua dos Pioneiros 17 Sítio Cercado Curitiba",
+            "Rua Isaac Ferreira da Cruz 2707 Sítio Cercado Curitiba",
+            "Rua Quitandinha 425 Sítio Cercado Curitiba",
+            "Rua Quitandinha 425 Sítio Cercado Curitiba",
+            "Rua Quitandinha 715 Sítio Cercado Curitiba",
+            "Rua Othon Ciarco dos Reis 585 Sítio Cercado Curitiba",
+            "Rua Arcanjo São Rafael 33 Sítio Cercado Curitiba",
+            "Rua Cidade de Xaxim 230 Sítio Cercado Curitiba",
+            "Rua José Vieira de Paula 253 Sítio Cercado Curitiba",
+            "Rua Agenor Antônio Rodrigues 283 Sítio Cercado Curitiba",
+            "Travessa Higínia Vieira de Santana Santos Curitiba 46 Sítio Cercado Curitiba",
+            "Rua Luiz Curgel do Amaral Valente 1230 Sítio Cercado Curitiba",
+            "Rua Pedro Airton Zimmermann 185 Sítio Cercado Curitiba",
+            "Rua Pedro Airton Zimmermann 185 Sítio Cercado Curitiba",
+            "Rua Ourizona 1812 Sítio Cercado Curitiba",
+            "Travessa Giba 2853 Sítio Cercado Curitiba",
+            "Rua Edgard Cavalcante de Albuquerque 463 Sítio Cercado Curitiba",
+            "Travessa Seis 3518 Sítio Cercado Curitiba",
+            "Rua Jussara 3797 Sítio Cercado Curitiba",
+            "Rua Ignes de Lourdes Gomes de Macedo 837 Sítio Cercado Curitiba",
+            "Rua Doutor José de Almeida Pimenta Almeida Macedo Sítio Cercado Curitiba",
+            "Rua Ignes de Lourdes Gomes de Macedo 156 Sítio Cercado Curitiba",
+            "Rua Paulo Mees 874 Sítio Cercado Curitiba"
+        ]
+    },
+    {
+        numero: "211",
+        rota: "VOLVO FÁBRICA - BOQUEIRÃO",
+        paradas: [
+            "Rua Professora Julia Valery Legat Neal 336 Xaxim Curitiba",
+            "Rua Professor Narciso Mendes 510 Xaxim Curitiba",
+            "Rua João Eugênio Batista 11 Xaxim Curitiba",
+            "Rua David Tows 855 Xaxim Curitiba",
+            "Rua Isaak Friesen 609 Xaxim Curitiba",
+            "Rua Abrão Jak Duck 256 Xaxim Curitiba",
+            "Rua David Tows 1200 Xaxim Curitiba",
+            "Rua David Tows 1200 Xaxim Curitiba",
+            "Rua Campina da Lagoa 38 Xaxim Curitiba",
+            "Rua Roberto Barbosa de Almeida 331 Alto Boqueirão Curitiba",
+            "Rua Roberto Barbosa de Almeida 331 Alto Boqueirão Curitiba",
+            "Rua Francisco Zem 160 Xaxim Curitiba",
+            "Rua Jorge Brey 113 Xaxim Curitiba",
+            "Rua Max Schubert 500 Xaxim Curitiba",
+            "Rua Max Schubert 500 Xaxim Curitiba",
+            "Rua Cristiano Strobel 2320 Boqueirão Curitiba",
+            "Rua Castilho Bley 941 Boqueirão Curitiba",
+            "Rua Paulo Setúbal 4122 Boqueirão Curitiba",
+            "Rua Tenente Coronel Villagran Cabrita 754 Boqueirão Curitiba",
+            "Rua Maestro Carlos Domingos Totti 2391 Boqueirão Curitiba",
+            "Rua Pastor Antônio Polito 1234 Alto Boqueirão Curitiba",
+            "Rua Marechal Hermes 2430 Boqueirão Curitiba",
+            "Rua Professora Edméa Neal Alcover 711 Alto Boqueirão Curitiba",
+            "Rua Jaguapitã 341 Alto Boqueirão Curitiba",
+            "Rua Francisco Derosso 4503 Alto Boqueirão Curitiba",
+            "Rua Francisco Derosso 6509 Alto Boqueirão Curitiba",
+            "Rua Domingos Sales Sobrinho 6465 Alto Boqueirão Curitiba",
+            "Rua Marschal Hugo Panasco Alvim 453 Alto Boqueirão Curitiba",
+            "Rua Silvio Helmbecker 662 Alto Boqueirão Curitiba",
+            "Rua Antônio 354 Alto Boqueirão Curitiba",
+            "Rua Eduardo Pinto da Rocha 744 Alto Boqueirão Curitiba",
+            "Rua Eduardo Pinto da Rocha 12564 Alto Boqueirão Curitiba",
+            "Rua Eduardo Pinto da Rocha 68 Alto Boqueirão Curitiba",
+            "Rua Fernando Munhoz de Souza 55 Alto Boqueirão Curitiba"
+        ]
+    },
+    {
+        numero: "210",
+        rota: "VOLVO FÁBRICA - BARREIRINHA",
+        paradas: [
+            "Rua Soledade Regina Sanzovo Mourão 1197 Lamenha Pequena Curitiba",
+            "Rua Heriberto Fiore d Oporto 160 Santa Felicidade Curitiba",
+            "Rua Ladislau Gubaua 498 Lamenha Grande Almirante Tamandaré",
+            "Rua dos Marceneiros 48 Jardim Dourados Almirante Tamandaré",
+            "Rua Rio Xingu 95 Lamenha Grande Almirante Tamandaré",
+            "Avenida Barão do Rio Branco 316 Jardim Valma Almirante Tamandaré",
+            "Rua Alfredo De Andrade 50 Jardim Monterrey Almirante Tamandaré",
+            "Rua Victorio Prodocimo 427 Vila Prosdocimo Almirante Tamandaré",
+            "Rua Manoel Teixeira De Lara 35 Jardim Dona Luiza Almirante Tamandaré",
+            "Avenida Francisco Kruger 5496 Vila Formosa Almirante Tamandaré",
+            "Avenida Anita Garibaldi 6121 Barreirinha Curitiba",
+            "Rua Agostinho Zaninelli 1129 Boa Vista Curitiba",
+            "Rua Valdomiro Silveira 135 Boa Vista Curitiba"
+        ]
+    },
+    {
+        numero: "208",
+        rota: "VOLVO FÁBRICA - JD IPÊ",
+        paradas: [
+            "Rua João Batista Manzoque 14 Pe Pedro Moro São José dos Pinhais",
+            "Rua Tenente Djalma Dutra 2121 Bom Jesus São José dos Pinhais",
+            "Rua Doutor Múcio Júnior 2600 Aristocrata São José dos Pinhais",
+            "Rua Passos de Oliveira 521 Centro São José dos Pinhais",
+            "Travessa Lourival Belmiro Berti 97 Cidade Jardim São José dos Pinhais",
+            "Rua Pedro Aires da Rocha 84 Afonso Pena São José dos Pinhais",
+            "Rua Deputado Arnaldo Faivro Busato 506 Afonso Pena São José dos Pinhais",
+            "Rua Altevir de Lara 416d Afonso Pena São José dos Pinhais",
+            "Rua José Nunes Pacheco 188 Jardim Independência São José dos Pinhais",
+            "Rua Lourenço José de Paula 1310 Jardim Independência São José dos Pinhais",
+            "Rua Antônio Dantas 1906 Jardim Independência São José dos Pinhais",
+            "Rua Afonso de Lima 1484 Jardim Independência São José dos Pinhais",
+            "Rua Professor Thales de Souza e Silva 1251 Parque da Fonte São José dos Pinhais",
+            "Rua Aníbal Silva 1159 Parque da Fonte São José dos Pinhais",
+            "Rua Aníbal Silva 973 Parque da Fonte São José dos Pinhais",
+            "Rua Aníbal Silva 973 Parque da Fonte São José dos Pinhais",
+            "Rua Dolovico Pissaia 840 Parque da Fonte São José dos Pinhais",
+            "Rua João Alceu Fialla 167 Parque da Fonte São José dos Pinhais",
+            "Rua Júlio Cozzetti 1778 Parque da Fonte São José dos Pinhais",
+            "Rua Leônidas Secin 148 Jardim Independência São José dos Pinhais",
+            "Rua Genoveva kuboski kapuchin 804 Parque da Fonte São José dos Pinhais",
+            "Rua Leopoldo Precoma 581 Parque da Fonte São José dos Pinhais",
+            "Rua Antônio Bianchetti 398 Inã São José dos Pinhais",
+            "Rua Padre Antônio Darius 667 Inã São José dos Pinhais",
+            "Rua Evanira Bonin da Rocha Cruz 1027 Inã São José dos Pinhais",
+            "Rua Dionizio Alves Fontes 297 Inã São José dos Pinhais",
+            "Rua Dionizio Alves Fontes 297 Inã São José dos Pinhais",
+            "Rua Tavares de Lyra 8697 Inã São José dos Pinhais"
+        ]
+    },
+    {
+        numero: "207",
+        rota: "VOLVO FÁBRICA - FANNY",
+        paradas: [
+            "Rua Floravante José Beraldin 40 Cidade Industrial de Curitiba Curitiba",
+            "Rua Badá Lima José Vicente Gonçalves 168 Cidade Industrial de Curitiba Curitiba",
+            "Rua Dom José de Camargo Barros 186 Cidade Industrial de Curitiba Curitiba",
+            "Rua Desembargador Cid Campelo 5231 Cidade Industrial de Curitiba Curitiba",
+            "Rua Arthur Martins Franco 325 Cidade Industrial de Curitiba Curitiba",
+            "Rua Rui de Moura 4255 Cidade Industrial de Curitiba Curitiba",
+            "Rua Pedro Gusso 4255 Cidade Industrial de Curitiba Curitiba",
+            "Rua Pedro Gusso 4255 Cidade Industrial de Curitiba Curitiba",
+            "Rua Ruy Fonseca Itiberê da Cunha 597 Cidade Industrial de Curitiba Curitiba",
+            "Rua Francisco Palolano Gabardo 650 Cidade Industrial de Curitiba Curitiba",
+            "Rua Leon Nicolau 1200 Capão Raso Curitiba",
+            "Rua Alberto Kramer 457 Capão Raso Curitiba",
+            "Rua Olindo Sequinel 1453 Capao Raso Curitiba",
+            "Rua Rubem Berta 1315 Pinheirinho Curitiba",
+            "Rua Elizário da Rocha Paranhos 94 Pinheirinho Curitiba",
+            "Rua Leonardo Pianowski 90 Pinheirinho Curitiba",
+            "Rua Capitão Argemiro Monteiro Wanderley 1100 Capão Raso Curitiba",
+            "Rua Nossa Senhora do Perpétuo Socorro 1104 Capão Raso Curitiba",
+            "Rua N Sra Do Perpetuo Socorro 895 Capão Raso Curitiba"
+        ]
+    },
+    {
+        numero: "206",
+        rota: "VOLVO FÁBRICA - SÃO MARCOS",
+        paradas: [
+            "Rua Osmar Plínio Caldeira 402 Del Rey São José dos Pinhais",
+            "Rua Doutor Murici 526 Área Rural São José dos Pinhais",
+            "Rua São Salvador 86 Ouro Fino São José dos Pinhais",
+            "Rua São Salvador 86 Ouro Fino São José dos Pinhais",
+            "Rua Padre Damião de Veuster 295 Costeira São José dos Pinhais",
+            "Avenida Heitor Berleze 111 Costeira São José dos Pinhais",
+            "Rua Maria Pasqualim Vaccari 800 Cruzeiro São José dos Pinhais",
+            "Rua Osvaldo Anacleto Bobato 370 Quissisana São José dos Pinhais",
+            "Rua Osvaldo Anacleto Bobato 306 Quissisana São José dos Pinhais",
+            "Rua Constante Moro Sobrinho 1125 Colônia Murici São José dos Pinhais",
+            "Rua Pedro Ghiuratto 208 Quissisana São José dos Pinhais",
+            "Avenida Benjamin Dossanbon 242 Quissisana São José dos Pinhais",
+            "Avenida Antônio Telma Neto 111 Rio Pequeno São José dos Pinhais",
+            "Rua dos Cedros 6 Rio Pequeno São José dos Pinhais"
+        ]
+    },
+    {
+        numero: "205",
+        rota: "VOLVO FÁBRICA - GUATUPÊ",
+        paradas: [
+            "Rua Clementino Zétola Junior 1941 Santo Antônio São José dos Pinhais",
+            "Travessa Leone Décimo Dal negro 16 Santo Antônio São José dos Pinhais",
+            "Rua Guilherme Dal Negro 240 Santo Antônio São José dos Pinhais",
+            "Rua Desembargador James Portugal Macedo 306 Santo Antônio São José dos Pinhais",
+            "Rua Margarida Petrelli Foggiatto 206 Santo Antônio São José dos Pinhais",
+            "Rua Elvira Zagorel Kozlovski 180 Pedro Moro São José dos Pinhais",
+            "Rua Gal Catao Menna B Monclaro 805 São Pedro São José dos Pinhais",
+            "Avenida das Torres 4483 São Pedro São José dos Pinhais",
+            "Rua Florianópolis 51 Ouro Fino São José dos Pinhais",
+            "Rua Curitiba 91 Ouro Fino São José dos Pinhais",
+            "Rua Pedro Vidolin 112 Cruzeiro São José dos Pinhais",
+            "Rua Celestina Escolaro Foggiatto 253 Cruzeiro São José dos Pinhais",
+            "Rua Iratí 681 Cruzeiro São José dos Pinhais",
+            "Rua Castro 474 Cruzeiro São José dos Pinhais",
+            "Rua Apucarana 858 Cruzeiro São José dos Pinhais",
+            "Rua Venceslau Marek 67 Águas Belas São José dos Pinhais",
+            "Rua Cruzeiro do Sul 235 Aviação São José dos Pinhais",
+            "Rua David Campista 1941 Aviação São José dos Pinhais",
+            "Rua Jônico 586 Aviação São José dos Pinhais",
+            "Rua Maurílio da Cruz 396 Inã São José dos Pinhais",
+            "Rua Marechal Hermes 2500 Inã São José dos Pinhais",
+            "Rua Moacir Escolaro 555 Rio Pequeno São José dos Pinhais",
+            "Rua Moacir Escolaro 555 Rio Pequeno São José dos Pinhais",
+            "Rua Rei Jesus 170 Inã São José dos Pinhais",
+            "Rua Wilson Luis Lopes 561 Inã São José dos Pinhais",
+            "Rua Olívio Setin 182 Inã São José dos Pinhais",
+            "Rua Anneliese Gellert Krisaner 3074 Inã São José dos Pinhais",
+            "Rua Adir Pedroso 590 Inã São José dos Pinhais"
+        ]
+    },
+    {
+        numero: "203",
+        rota: "VOLVO FÁBRICA - COLOMBO",
+        paradas: [
+            "Rua Batista Ganz 361 Santo Inácio Curitiba",
+            "Rua Vereador Washington Mansur 302 Atuba Curitiba",
+            "Rua Pedro Jacob Klock 456 Santa Cândida Curitiba",
+            "Rua Idalino Francisco Tulio 704 Santa Cândida Curitiba",
+            "Avenida São Gabriel 802 Campo Pequeno Colombo",
+            "Rua do Mineiro 523 Embu Colombo",
+            "Rua Orlando Cecon 158 Butiatuvirtm Colombo"
+        ]
+    },
+    {
+        numero: "202",
+        rota: "VOLVO FÁBRICA - KENNEDY",
+        paradas: [
+            "Rua Leandro Dacheux do Nascimento Júnior 81 Cidade Industrial de Curitiba Curitiba",
+            "Rua Viviane Guimarães Rezende 5000 Cidade Industrial de Curitiba Curitiba",
+            "Rua Major Ariovaldo Bianco 224 Cidade Industrial de Curitiba Curitiba",
+            "Rua Cristiano Atrozo 80 Cidade Industrial de Curitiba Curitiba",
+            "Rua Nicolau Vorobi 165 Cidade Industrial de Curitiba Curitiba",
+            "Rua José Batista dos Santos 1300 Cidade Industrial de Curitiba Curitiba",
+            "Rua José Batista dos Santos 1600 Cidade Industrial de Curitiba Curitiba",
+            "Rua Antônio Vivaldi 90 Fazendinha Curitiba",
+            "Avenida Alcir Martins Bastos 959 Fazendinha Curitiba",
+            "Rua Martins Fontes 122 Fazendinha Curitiba",
+            "Rua Carlos Klemtz 1385 Fazendinha Curitiba",
+            "Rua Aristides Borsato 381 Fazendinha Curitiba"
+        ]
+    },
+    {
+        numero: "201",
+        rota: "VOLVO FÁBRICA - PINHAIS",
+        paradas: [
+            "Rua João Alencar Guimarães 2121 Santa Quiteria Curitiba",
+            "Avenida Prefeito Omar Sabbag 501 Jardim Botânico Curitiba",
+            "Rua Manoel Martins de Abreu 159 Jardim Botânico Curitiba",
+            "Rua Américo Mattei 600 Tarumã Curitiba",
+            "Rua João Ponciano Borges 71 Capão da Imbuia Curitiba",
+            "Rua Professor Eunício Conceição 1462 Capão da Imbuia Curitiba",
+            "Rua General Lucas de Almeida Guimarães 312 Estância Pinhais Pinhais",
+            "Rua Ásia 75 Centro Pinhais",
+            "Rua Marrocos 174 Pineville Pinhais",
+            "Rua Sandro Carlos Sarda 105 Jardim Amélia Pinhais",
+            "Rua Palmas 98 Emiliano Perneta Pinhais",
+            "Rua Durval Bordignon 169 Alto Tarumã Pinhais",
+            "Rua Alfredo Saliba Smaka 70 Atuba Pinhais",
+            "Avenida Jacob Macanhan 2465 Emiliano Perneta Pinhais"
+        ]
+    }
+];
+        // Função para extrair bairro e cidade do endereço completo
+        function extrairLocalizacao(enderecoCompleto) {
+            const partes = enderecoCompleto.split(' ');
+            const cidade = partes.pop();
+            const bairro = partes.pop();
+            const endereco = partes.join(' ');
+            return { endereco, bairro, cidade };
+        }
+
+        // Preencher a tabela com todos os dados
+        function carregarTabela() {
+            const corpo = document.getElementById('corpo-tabela');
+            let totalParadas = 0;
+
+            dados.forEach(linha => {
+                linha.paradas.forEach(parada => {
+                    const local = extrairLocalizacao(parada);
+                    const row = corpo.insertRow();
+                    
+                    row.insertCell(0).textContent = linha.numero;
+                    row.insertCell(1).textContent = linha.rota;
+                    row.insertCell(2).textContent = local.endereco;
+                    row.insertCell(3).textContent = local.bairro;
+                    row.insertCell(4).textContent = local.cidade;
+                    
+                    totalParadas++;
+                });
+            });
+
+            document.getElementById('contador').textContent = `Total: ${totalParadas} paradas cadastradas`;
+        }
+
+        // Função de busca/filtro
+        document.getElementById('busca').addEventListener('input', function(e) {
+            const termo = e.target.value.toLowerCase();
+            const linhas = document.querySelectorAll('#corpo-tabela tr');
+            let contador = 0;
+
+            linhas.forEach(linha => {
+                const texto = linha.textContent.toLowerCase();
+                if (termo === '' || texto.includes(termo)) {
+                    linha.style.display = '';
+                    if (termo !== '') {
+                        linha.classList.add('destaque');
+                        contador++;
+                    } else {
+                        linha.classList.remove('destaque');
+                    }
+                } else {
+                    linha.style.display = 'none';
+                    linha.classList.remove('destaque');
+                }
+            });
+
+            document.getElementById('contador').textContent = 
+                termo === '' 
+                    ? `Total: ${linhas.length} paradas cadastradas` 
+                    : `${contador} paradas encontradas`;
+        });
+
+        // Inicialização
+        window.onload = carregarTabela;
+    </script>
 </body>
 </html>
